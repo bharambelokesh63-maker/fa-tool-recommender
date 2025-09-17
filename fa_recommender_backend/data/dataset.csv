@@ -1,0 +1,21 @@
+StudentID,Year,LearningStyle,ConfidenceLevel,PreferredTool,LeastEffectiveTool,BloomLevel
+1,2nd Year,Visual,4,Quiz,Reflection Journal,Understand
+2,3rd Year,Auditory,3,Project,Quiz,Apply
+3,1st Year,Reading/Writing,5,Case Study,Group Work,Analyze
+4,4th Year,Kinesthetic,2,Lab Work,Poster Presentation,Apply
+5,2nd Year,Visual,3,Group Work,Viva / Oral Test,Understand
+6,3rd Year,Auditory,4,Presentation / PPT,Open Book Test,Create
+7,1st Year,Reading/Writing,2,Written Paper,Role Play,Remember
+8,4th Year,Kinesthetic,5,Project,Quiz,Evaluate
+9,2nd Year,Visual,3,Poster Presentation,Case Study,Understand
+10,3rd Year,Auditory,2,Quiz,Reflection Journal,Remember
+11,1st Year,Reading/Writing,4,Open Book Test,Group Work,Apply
+12,4th Year,Kinesthetic,3,Lab Work,Poster Presentation,Analyze
+13,2nd Year,Visual,5,Project,Viva / Oral Test,Create
+14,3rd Year,Auditory,4,Presentation / PPT,Written Paper,Evaluate
+15,1st Year,Reading/Writing,1,Quiz,Case Study,Remember
+16,4th Year,Kinesthetic,2,Role Play,Poster Presentation,Apply
+17,2nd Year,Visual,3,Group Work,Reflection Journal,Understand
+18,3rd Year,Auditory,2,Viva / Oral Test,Open Book Test,Analyze
+19,1st Year,Reading/Writing,5,Written Paper,Quiz,Create
+20,4th Year,Kinesthetic,4,Project,Poster Presentation,Evaluate
