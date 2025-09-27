@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - FA Recommendation System{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/student.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold text-primary mb-2">
+                <i class="fas fa-user-graduate me-3"></i>Student Dashboard
+            </h1>
+            <p class="lead text-muted">Discover personalized formative assessment recommendations</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="welcome-card bg-gradient-primary text-white p-3 rounded">
+                <h6 class="mb-1">Welcome back!</h6>
+                <p class="mb-0 small">{{ session.get('username') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-icon-large bg-primary mb-2">
+                    <i class="fas fa-clipboard-check text-white"></i>
+                </div>
+                <h4 class="mb-0">{{ assessments|length }}</h4>
+                <p class="text-muted mb-0">Available Assessments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-icon-large bg-success mb-2">
+                    <i class="fas fa-check-circle text-white"></i>
+                </div>
+                <h4 class="mb-0">{{ my_responses|length }}</h4>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-icon-large bg-warning mb-2">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <h4 class="mb-0">AI</h4>
+                <p class="text-muted mb-0">Powered Recommendations</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-icon-large bg-info mb-2">
+                    <i class="fas fa-lightbulb text-white"></i>
+                </div>
+                <h4 class="mb-0">Smart</h4>
+                <p class="text-muted mb-0">Learning Insights</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Assessments -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2 text-primary"></i>
+                        Available Assessments
+                    </h5>
+                    <span class="badge bg-primary">{{ assessments|length }} Available</span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if assessments %}
+                <div class="row">
+                    {% for assessment in assessments %}
+                    <div class="col-md-6 mb-3">
+                        <div class="assessment-card card border-light">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="assessment-icon me-3">
+                                        <i class="fas fa-clipboard-list text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title mb-1">{{ assessment[3] }}</h6>
+                                        <p class="text-muted small mb-2">{{ assessment[2] }}</p>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-info-soft text-info me-2">
+                                                {{ assessment[4] or 'Mixed Level' }}
+                                            </span>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ assessment[5][:10] }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="assessment-status">
+                                        {% set completed = my_responses|selectattr('1', 'equalto', assessment[0])|list|length > 0 %}
+                                        {% if completed %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Completed
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div>
+                                        {% if completed %}
+                                        <button class="btn btn-sm btn-outline-success" disabled>
+                                            <i class="fas fa-eye me-1"></i>View Result
+                                        </button>
+                                        {% else %}
+                                        <a href="/student/assessment/{{ assessment[0] }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-play me-1"></i>Start Assessment
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Assessments Available</h5>
+                    <p class="text-muted">Check back later for new assessments from your teachers</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Learning Tips -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-gradient-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    AI Learning Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="tip-item mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-brain text-primary me-2"></i>
+                        <strong class="small">Personalized Learning</strong>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        Our AI analyzes your learning style to recommend the most effective assessment format for you.
+                    </p>
+                </div>
+                
+                <div class="tip-item mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        <strong class="small">Progress Tracking</strong>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        Complete assessments to build your learning profile and get better recommendations.
+                    </p>
+                </div>
+                
+                <div class="tip-item">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-target text-warning me-2"></i>
+                        <strong class="small">Goal Setting</strong>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        Focus on specific Bloom's taxonomy levels to develop targeted cognitive skills.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-history me-2 text-secondary"></i>
+                    Recent Activity
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if my_responses %}
+                <div class="activity-timeline">
+                    {% for response in my_responses[:3] %}
+                    <div class="activity-item d-flex align-items-center mb-3">
+                        <div class="activity-icon bg-primary me-3">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 small">{{ response[4] }}</h6>
+                            <p class="text-muted small mb-1">{{ response[3] }}</p>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-robot me-1"></i>
+                                Recommended: <strong>{{ response[12] }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-clock text-muted mb-2"></i>
+                    <p class="text-muted small mb-0">No activity yet. Complete your first assessment!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Modal -->
+<div class="modal fade" id="howItWorksModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>How It Works
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="step-icon bg-primary mb-3">
+                            <i class="fas fa-clipboard-list text-white"></i>
+                        </div>
+                        <h6>1. Choose Assessment</h6>
+                        <p class="small text-muted">Select an available assessment from your teacher</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="step-icon bg-success mb-3">
+                            <i class="fas fa-user-edit text-white"></i>
+                        </div>
+                        <h6>2. Answer Questions</h6>
+                        <p class="small text-muted">Provide information about your learning preferences and style</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="step-icon bg-info mb-3">
+                            <i class="fas fa-magic text-white"></i>
+                        </div>
+                        <h6>3. Get Recommendation</h6>
+                        <p class="small text-muted">Receive AI-powered personalized assessment tool recommendation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="floating-action">
+    <button class="btn btn-primary btn-lg rounded-circle" data-bs-toggle="modal" data-bs-target="#howItWorksModal">
+        <i class="fas fa-question"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add animations to stat cards
+document.addEventListener('DOMContentLoaded', function() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.animation = 'fadeInUp 0.6s ease forwards';
+        }, index * 100);
+    });
+    
+    // Add hover effects to assessment cards
+    const assessmentCards = document.querySelectorAll('.assessment-card');
+    assessmentCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+});
+
+// Add pulsing animation to floating action button
+setInterval(function() {
+    const fab = document.querySelector('.floating-action .btn');
+    fab.classList.add('pulse-animation');
+    setTimeout(() => {
+        fab.classList.remove('pulse-animation');
+    }, 1000);
+}, 5000);
+</script>
+
+<style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 0.6s ease-in-out;
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.stat-icon-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.assessment-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef !important;
+}
+
+.assessment-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.activity-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.floating-action {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.floating-action .btn {
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+}
+
+.floating-action .btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.bg-info-soft { 
+    background-color: rgba(13, 202, 240, 0.1) !important; 
+    color: #0dcaf0 !important;
+}
+</style>
+{% endblock %}

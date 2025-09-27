@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Login - FA Recommendation System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="login-container">
+            <!-- Hero Section -->
+            <div class="text-center mb-5">
+                <div class="hero-icon mb-3">
+                    <i class="fas fa-brain fa-4x text-primary"></i>
+                </div>
+                <h1 class="display-4 fw-bold text-primary mb-3">Smart Assessment</h1>
+                <p class="lead text-muted">AI-Driven Recommendation System for Formative Assessment Tools</p>
+                <div class="feature-badges mt-4">
+                    <span class="badge bg-primary-soft me-2 p-2">
+                        <i class="fas fa-robot me-1"></i>Machine Learning
+                    </span>
+                    <span class="badge bg-success-soft me-2 p-2">
+                        <i class="fas fa-chart-bar me-1"></i>Analytics
+                    </span>
+                    <span class="badge bg-info-soft p-2">
+                        <i class="fas fa-lightbulb me-1"></i>Personalized
+                    </span>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="login-form-container">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Continue
+                        </h3>
+                        
+                        <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                            <div class="mb-4">
+                                <label for="username" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2 text-primary"></i>Username
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="username" 
+                                       name="username" required placeholder="Enter your username">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-2 text-primary"></i>Password
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-lg" id="password" 
+                                           name="password" required placeholder="Enter your password">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                                <div class="spinner-border spinner-border-sm d-none ms-2" id="loginSpinner"></div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Credentials -->
+            <div class="demo-credentials mt-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info-soft">
+                        <h6 class="mb-0 text-info">
+                            <i class="fas fa-info-circle me-2"></i>Demo Credentials
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Teacher Account</h6>
+                                <button class="btn btn-outline-primary btn-sm demo-fill" 
+                                        data-username="teacher1" data-password="teacher123">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>
+                                    teacher1 / teacher123
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-success">Student Account</h6>
+                                <button class="btn btn-outline-success btn-sm demo-fill me-2" 
+                                        data-username="student1" data-password="student123">
+                                    <i class="fas fa-user-graduate me-1"></i>
+                                    student1 / student123
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Features -->
+            <div class="features-section mt-5">
+                <h4 class="text-center mb-4">System Features</h4>
+                <div class="row g-3">
+                    <div class="col-md-4 text-center">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-brain fa-2x text-primary mb-2"></i>
+                            <h6>AI Recommendations</h6>
+                            <p class="small text-muted">Machine learning algorithms analyze student preferences</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                            <h6>Analytics Dashboard</h6>
+                            <p class="small text-muted">Visual insights for teachers to make informed decisions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="feature-card p-3">
+                            <i class="fas fa-tasks fa-2x text-warning mb-2"></i>
+                            <h6>Rubric Generation</h6>
+                            <p class="small text-muted">Automated rubric creation based on assessment tools</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.hero-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+
+.feature-badges .badge {
+    font-size: 0.9rem;
+    border-radius: 20px;
+}
+
+.bg-primary-soft { background-color: rgba(13, 110, 253, 0.1) !important; }
+.bg-success-soft { background-color: rgba(25, 135, 84, 0.1) !important; }
+.bg-info-soft { background-color: rgba(13, 202, 240, 0.1) !important; }
+
+.login-form-container .card {
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.demo-fill {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.demo-fill:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        margin: 1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Demo credential buttons
+    const demoButtons = document.querySelectorAll('.demo-fill');
+    demoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const username = this.getAttribute('data-username');
+            const password = this.getAttribute('data-password');
+            
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            
+            // Add highlight effect
+            this.classList.add('btn-primary');
+            setTimeout(() => {
+                this.classList.remove('btn-primary');
+            }, 1000);
+        });
+    });
+    
+    // Login form submission
+    const loginForm = document.getElementById('loginForm');
+    const loginSpinner = document.getElementById('loginSpinner');
+    
+    loginForm.addEventListener('submit', function() {
+        loginSpinner.classList.remove('d-none');
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+    });
+    
+    // Add floating animation to hero icon
+    const heroIcon = document.querySelector('.hero-icon i');
+    setInterval(() => {
+        heroIcon.style.transform = 'translateY(-5px)';
+        setTimeout(() => {
+            heroIcon.style.transform = 'translateY(0)';
+        }, 1000);
+    }, 2000);
+});
+</script>
+{% endblock %}

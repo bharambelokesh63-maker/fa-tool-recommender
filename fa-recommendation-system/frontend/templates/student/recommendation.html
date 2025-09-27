@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}AI Recommendation - {{ prediction.predicted_tool }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.result-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 3rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: float 20s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(-50px) translateY(-50px); }
+}
+
+.recommendation-card {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(40, 167, 69, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.confidence-meter {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50px;
+    height: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #28a745);
+    border-radius: 50px;
+    transition: width 2s ease-in-out;
+    animation: fillAnimation 2s ease-in-out;
+}
+
+@keyframes fillAnimation {
+    0% { width: 0%; }
+    100% { width: var(--confidence-width); }
+}
+
+.explanation-card {
+    background: #f8f9ff;
+    border: none;
+    border-radius: 15px;
+    border-left: 5px solid #667eea;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+}
+
+.analysis-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.analysis-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.probability-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.probability-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: width 1.5s ease-in-out;
+}
+
+.action-buttons .btn {
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 0.5rem;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.fa-trophy {
+    color: #ffd700;
+    filter: drop-shadow(0 0 10px #ffd700);
+}
+
+.loading-recommendation {
+    display: none;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Result Header -->
+<div class="result-header">
+    <div class="position-relative">
+        <div class="mb-3">
+            <i class="fas fa-robot fa-4x mb-3 pulse-animation"></i>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">AI Recommendation Complete!</h1>
+        <p class="lead mb-0">Our machine learning algorithm has analyzed your preferences</p>
+    </div>
+</div>
+
+<!-- Main Recommendation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="recommendation-card">
+            <div class="position-relative">
+                <i class="fas fa-trophy fa-3x mb-3"></i>
+                <h2 class="display-5 fw-bold mb-3">{{ prediction.predicted_tool }}</h2>
+                <p class="lead mb-3">This is your personalized formative assessment tool!</p>
+                
+                <div class="confidence-section">
+                    <h6 class="mb-2">AI Confidence Level</h6>
+                    <div class="confidence-meter">
+                        <div class="confidence-fill" style="--confidence-width: {{ (prediction.confidence * 100)|round }}%; width: {{ (prediction.confidence * 100)|round }}%;"></div>
+                    </div>
+                    <p class="mb-0"><strong>{{ (prediction.confidence * 100)|round }}%</strong> confidence in this recommendation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Explanation Section -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card explanation-card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>
+                    Why This Recommendation?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start">
+                    <div class="me-3">
+                        <i class="fas fa-quote-left text-primary fa-2x opacity-50"></i>
+                    </div>
+                    <div>
+                        <p class="lead text-muted mb-3">{{ prediction.explanation }}</p>
+                        
+                        <!-- Analysis breakdown -->
+                        <div class="analysis-breakdown">
+                            <h6 class="text-primary mb-3">Analysis Factors:</h6>
+                            
+                            <div class="analysis-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-brain text-primary me-2"></i>
+                                    <strong>Learning Style Match</strong>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Your 
+                                    {% if student_data.learning_mode == 1 %}reading/writing
+                                    {% elif student_data.learning_mode == 2 %}listening
+                                    {% elif student_data.learning_mode == 3 %}visual
+                                    {% else %}hands-on{% endif %}
+                                    learning preference aligns perfectly with {{ prediction.predicted_tool }}.
+                                </p>
+                            </div>
+                            
+                            <div class="analysis-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-clock text-success me-2"></i>
+                                    <strong>Time Compatibility</strong>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Your available time frame 
+                                    ({% if student_data.time_available == 1 %}short
+                                    {% elif student_data.time_available == 2 %}medium
+                                    {% else %}long{% endif %})
+                                    works well with this assessment format.
+                                </p>
+                            </div>
+                            
+                            <div class="analysis-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-user-graduate text-info me-2"></i>
+                                    <strong>Confidence Level</strong>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Your confidence level ({{ student_data.confidence }}/5) 
+                                    {% if student_data.confidence >= 4 %}indicates readiness for challenging assessments
+                                    {% elif student_data.confidence >= 3 %}suggests balanced approach works best
+                                    {% else %}shows preference for supportive assessment formats{% endif %}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Tool Benefits -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-star me-2"></i>
+                    Benefits of {{ prediction.predicted_tool }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="benefit-item mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon bg-primary text-white">
+                            <i class="fas fa-target"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-1">Targeted Learning</h6>
+                            <p class="small text-muted mb-0">Focuses on your specific learning objectives</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="benefit-item mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon bg-success text-white">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-1">Skill Development</h6>
+                            <p class="small text-muted mb-0">Enhances your cognitive abilities effectively</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon bg-warning text-white">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-1">Better Performance</h6>
+                            <p class="small text-muted mb-0">Optimized for your learning style</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alternative Recommendations -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-list-alt me-2"></i>
+                    Alternative Options
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for tool, probability in prediction.all_probabilities.items() %}
+                {% if tool != prediction.predicted_tool %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold">{{ tool }}</span>
+                        <span class="badge bg-secondary">{{ (probability * 100)|round }}%</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: {{ (probability * 100)|round }}%;"></div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="text-center action-buttons">
+    <a href="/student/dashboard" class="btn btn-primary btn-lg">
+        <i class="fas fa-home me-2"></i>Back to Dashboard
+    </a>
+    <button class="btn btn-success btn-lg" onclick="shareResult()">
+        <i class="fas fa-share me-2"></i>Share Result
+    </button>
+    <button class="btn btn-info btn-lg" onclick="printResult()">
+        <i class="fas fa-print me-2"></i>Print Report
+    </button>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Recommendation Sent Successfully!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-paper-plane fa-3x text-success mb-3"></i>
+                <h4>Your Response Has Been Recorded</h4>
+                <p class="text-muted mb-4">Your teacher can now see your preferred assessment tool and make informed decisions about the class assessment format.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>What's Next?</strong><br>
+                    Your teacher will review all student preferences and finalize the assessment tool for the class.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                    <i class="fas fa-thumbs-up me-2"></i>Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Show success modal when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    
+    // Show modal after a brief delay for better UX
+    setTimeout(() => {
+        successModal.show();
+    }, 1000);
+    
+    // Animate confidence meter
+    setTimeout(() => {
+        const confidenceFill = document.querySelector('.confidence-fill');
+        if (confidenceFill) {
+            confidenceFill.style.animation = 'fillAnimation 2s ease-in-out forwards';
+        }
+    }, 500);
+    
+    // Animate probability bars
+    setTimeout(() => {
+        const probabilityBars = document.querySelectorAll('.probability-fill');
+        probabilityBars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.width = bar.style.width; // Trigger animation
+            }, index * 200);
+        });
+    }, 1500);
+    
+    // Add scroll animations to analysis items
+    const analysisItems = document.querySelectorAll('.analysis-item');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+            }
+        });
+    });
+    
+    analysisItems.forEach(item => {
+        observer.observe(item);
+    });
+});
+
+function shareResult() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'My FA Tool Recommendation',
+            text: `I got {{ prediction.predicted_tool }} as my recommended formative assessment tool with {{ (prediction.confidence * 100)|round }}% confidence!`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        const shareText = `My FA Tool Recommendation: {{ prediction.predicted_tool }} ({{ (prediction.confidence * 100)|round }}% confidence)`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            showToast('Result copied to clipboard!', 'success');
+        });
+    }
+}
+
+function printResult() {
+    // Hide action buttons and modals before printing
+    const actionButtons = document.querySelector('.action-buttons');
+    const modals = document.querySelectorAll('.modal');
+    
+    actionButtons.style.display = 'none';
+    modals.forEach(modal => modal.style.display = 'none');
+    
+    window.print();
+    
+    // Restore elements after printing
+    setTimeout(() => {
+        actionButtons.style.display = 'block';
+        modals.forEach(modal => modal.style.display = '');
+    }, 1000);
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Add some celebratory confetti effect
+function createConfetti() {
+    const colors = ['#667eea', '#764ba2', '#28a745', '#ffd700', '#ff6b6b'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            left: ${Math.random() * 100}%;
+            top: -10px;
+            z-index: 10000;
+            animation: confettiFall ${Math.random() * 3 + 2}s linear forwards;
+        `;
+        
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+            confetti.remove();
+        }, 5000);
+    }
+}
+
+// Add confetti animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes confettiFall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Trigger confetti after a short delay
+setTimeout(createConfetti, 1500);
+</script>
+{% endblock %}

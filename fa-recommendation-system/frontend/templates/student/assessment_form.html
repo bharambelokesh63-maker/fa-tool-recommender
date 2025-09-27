@@ -1,0 +1,695 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Form - {{ assessment[3] }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.assessment-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+    animation: fadeInSlide 0.5s ease-in-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+.form-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+}
+
+.question-card {
+    border-left: 4px solid #667eea;
+    background: #f8f9ff;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.custom-radio, .custom-checkbox {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-radio:hover, .custom-checkbox:hover {
+    transform: scale(1.02);
+}
+
+.btn-step {
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-step:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.step-indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.step-indicator.completed {
+    background: #28a745;
+    color: white;
+}
+
+.step-indicator.active {
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-indicator.pending {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.bloom-info {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Assessment Header -->
+<div class="assessment-header text-center">
+    <h1 class="mb-2">
+        <i class="fas fa-clipboard-list me-3"></i>{{ assessment[3] }}
+    </h1>
+    <p class="mb-3 lead">{{ assessment[2] }} Assessment</p>
+    <div class="d-flex justify-content-center align-items-center">
+        <span class="badge bg-light text-dark me-3 p-2">
+            <i class="fas fa-layer-group me-1"></i>{{ assessment[4] or 'Mixed Level' }}
+        </span>
+        <span class="badge bg-light text-dark p-2">
+            <i class="fas fa-brain me-1"></i>AI-Powered Recommendation
+        </span>
+    </div>
+</div>
+
+<!-- Progress Steps -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="step-item text-center">
+                <div class="step-indicator completed" id="step1-indicator">1</div>
+                <small class="text-muted">Personal Info</small>
+            </div>
+            <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                <div class="progress-bar bg-primary" id="progress-bar" style="width: 14%"></div>
+            </div>
+            <div class="step-item text-center">
+                <div class="step-indicator active" id="step2-indicator">2</div>
+                <small class="text-muted">Learning Style</small>
+            </div>
+            <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                <div class="progress-bar bg-secondary" style="width: 0%"></div>
+            </div>
+            <div class="step-item text-center">
+                <div class="step-indicator pending" id="step3-indicator">3</div>
+                <small class="text-muted">Preferences</small>
+            </div>
+            <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                <div class="progress-bar bg-secondary" style="width: 0%"></div>
+            </div>
+            <div class="step-item text-center">
+                <div class="step-indicator pending" id="step4-indicator">4</div>
+                <small class="text-muted">Goals</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assessment Form -->
+<div class="form-card card">
+    <div class="card-body p-4">
+        <form id="assessmentForm" method="POST" action="/student/submit_assessment">
+            <input type="hidden" name="assessment_id" value="{{ assessment[0] }}">
+            
+            <!-- Step 1: Personal Information -->
+            <div class="form-step active" id="step1">
+                <div class="question-card p-4 mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-user me-2"></i>Tell us about yourself
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Current Year of Study</label>
+                            <select class="form-select form-select-lg" name="year_of_study" required>
+                                <option value="">Select your year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Weekly Self-Study Hours</label>
+                            <select class="form-select form-select-lg" name="study_hours" required>
+                                <option value="">Select hours</option>
+                                <option value="1">0-5 hours</option>
+                                <option value="2">6-10 hours</option>
+                                <option value="3">11-15 hours</option>
+                                <option value="4">16-20 hours</option>
+                                <option value="5">More than 20 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Confidence Level in Understanding New Topics</label>
+                        <div class="confidence-slider mt-3">
+                            <div class="row text-center">
+                                {% for i in range(1, 6) %}
+                                <div class="col">
+                                    <div class="custom-radio">
+                                        <input type="radio" class="btn-check" name="confidence_level" 
+                                               id="confidence{{ i }}" value="{{ i }}" required>
+                                        <label class="btn btn-outline-primary w-100 py-3" for="confidence{{ i }}">
+                                            <div class="confidence-emoji mb-1">
+                                                {% if i == 1 %}😟{% elif i == 2 %}😕{% elif i == 3 %}😐{% elif i == 4 %}🙂{% else %}😃{% endif %}
+                                            </div>
+                                            <div class="fw-bold">{{ i }}</div>
+                                            <small>
+                                                {% if i == 1 %}Very Low{% elif i == 2 %}Low{% elif i == 3 %}Moderate{% elif i == 4 %}High{% else %}Very High{% endif %}
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Learning Style -->
+            <div class="form-step" id="step2">
+                <div class="question-card p-4 mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-brain me-2"></i>How do you learn best?
+                    </h4>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Preferred Learning Mode</label>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="learning_mode" id="reading" value="1" required>
+                                    <label class="btn btn-outline-info w-100 p-3" for="reading">
+                                        <i class="fas fa-book fa-2x mb-2 d-block"></i>
+                                        <strong>Reading / Writing</strong>
+                                        <p class="small mb-0 mt-1">Books, Notes, Written Material</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="learning_mode" id="listening" value="2" required>
+                                    <label class="btn btn-outline-success w-100 p-3" for="listening">
+                                        <i class="fas fa-headphones fa-2x mb-2 d-block"></i>
+                                        <strong>Listening</strong>
+                                        <p class="small mb-0 mt-1">Lectures, Podcasts, Audio</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="learning_mode" id="visual" value="3" required>
+                                    <label class="btn btn-outline-warning w-100 p-3" for="visual">
+                                        <i class="fas fa-play-circle fa-2x mb-2 d-block"></i>
+                                        <strong>Visual</strong>
+                                        <p class="small mb-0 mt-1">Videos, Animations, Diagrams</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="learning_mode" id="practical" value="4" required>
+                                    <label class="btn btn-outline-danger w-100 p-3" for="practical">
+                                        <i class="fas fa-tools fa-2x mb-2 d-block"></i>
+                                        <strong>Hands-on</strong>
+                                        <p class="small mb-0 mt-1">Experiments, Practical Work</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Topic Difficulty Level</label>
+                            <select class="form-select form-select-lg" name="difficulty_level" required>
+                                <option value="">Select difficulty</option>
+                                <option value="1">Easy</option>
+                                <option value="2">Medium</option>
+                                <option value="3">Hard</option>
+                                <option value="4">Very Hard</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Topic Type</label>
+                            <select class="form-select form-select-lg" name="topic_type" required>
+                                <option value="">Select type</option>
+                                <option value="1">Theory</option>
+                                <option value="2">Practical</option>
+                                <option value="3">Mixed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Preferences & Resources -->
+            <div class="form-step" id="step3">
+                <div class="question-card p-4 mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-clock me-2"></i>Your Preferences & Resources
+                    </h4>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Time Available for Assessment</label>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="time_available" id="short" value="1" required>
+                                    <label class="btn btn-outline-success w-100 p-3" for="short">
+                                        <i class="fas fa-clock mb-2 d-block"></i>
+                                        <strong>Short</strong>
+                                        <p class="small mb-0">Less than 30 mins</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="time_available" id="medium" value="2" required>
+                                    <label class="btn btn-outline-warning w-100 p-3" for="medium">
+                                        <i class="fas fa-clock mb-2 d-block"></i>
+                                        <strong>Medium</strong>
+                                        <p class="small mb-0">30-60 mins</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="custom-radio">
+                                    <input type="radio" class="btn-check" name="time_available" id="long" value="3" required>
+                                    <label class="btn btn-outline-danger w-100 p-3" for="long">
+                                        <i class="fas fa-clock mb-2 d-block"></i>
+                                        <strong>Long</strong>
+                                        <p class="small mb-0">More than 1 hour</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Available Resources (Select all that apply)</label>
+                        <div class="row mt-3">
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="resources" id="internet" value="Internet">
+                                    <label class="btn btn-outline-primary w-100" for="internet">
+                                        <i class="fas fa-wifi me-1"></i>Internet
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="resources" id="computer" value="Computer">
+                                    <label class="btn btn-outline-success w-100" for="computer">
+                                        <i class="fas fa-laptop me-1"></i>Computer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="resources" id="lab" value="Lab">
+                                    <label class="btn btn-outline-warning w-100" for="lab">
+                                        <i class="fas fa-flask me-1"></i>Lab
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="resources" id="library" value="Library">
+                                    <label class="btn btn-outline-info w-100" for="library">
+                                        <i class="fas fa-book me-1"></i>Library
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Previous FA Tools Experience (Select all you've used)</label>
+                        <div class="row mt-3">
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="quiz" value="Quiz">
+                                <label class="btn btn-outline-secondary w-100" for="quiz">Quiz</label>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="project" value="Project">
+                                <label class="btn btn-outline-secondary w-100" for="project">Project</label>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="labwork" value="Lab Work">
+                                <label class="btn btn-outline-secondary w-100" for="labwork">Lab Work</label>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="casestudy" value="Case Study">
+                                <label class="btn btn-outline-secondary w-100" for="casestudy">Case Study</label>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="presentation" value="Presentation / PPT">
+                                <label class="btn btn-outline-secondary w-100" for="presentation">Presentation</label>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <input type="checkbox" class="btn-check" name="previous_tools" id="viva" value="Viva / Oral Test">
+                                <label class="btn btn-outline-secondary w-100" for="viva">Viva</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Learning Goals -->
+            <div class="form-step" id="step4">
+                <div class="bloom-info text-center mb-4">
+                    <h5 class="mb-2">
+                        <i class="fas fa-graduation-cap me-2"></i>Bloom's Taxonomy Levels
+                    </h5>
+                    <p class="mb-0">Choose the cognitive skills you want to develop</p>
+                </div>
+                
+                <div class="question-card p-4 mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-target me-2"></i>Learning Goals
+                    </h4>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Which Bloom's Taxonomy levels do you want to focus on? (Select all that apply)</label>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="remember" value="Remember">
+                                    <label class="btn btn-outline-info w-100 p-3 text-start" for="remember">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-memory fa-2x me-3 text-info"></i>
+                                            <div>
+                                                <strong>Remember</strong>
+                                                <p class="small mb-0 text-muted">Recall facts, terms, basic concepts</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="understand" value="Understand">
+                                    <label class="btn btn-outline-success w-100 p-3 text-start" for="understand">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-lightbulb fa-2x me-3 text-success"></i>
+                                            <div>
+                                                <strong>Understand</strong>
+                                                <p class="small mb-0 text-muted">Explain ideas, summarize concepts</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="apply" value="Apply">
+                                    <label class="btn btn-outline-warning w-100 p-3 text-start" for="apply">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-cogs fa-2x me-3 text-warning"></i>
+                                            <div>
+                                                <strong>Apply</strong>
+                                                <p class="small mb-0 text-muted">Use knowledge in new situations</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="analyze" value="Analyze">
+                                    <label class="btn btn-outline-danger w-100 p-3 text-start" for="analyze">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-search fa-2x me-3 text-danger"></i>
+                                            <div>
+                                                <strong>Analyze</strong>
+                                                <p class="small mb-0 text-muted">Break down, examine relationships</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="evaluate" value="Evaluate">
+                                    <label class="btn btn-outline-primary w-100 p-3 text-start" for="evaluate">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-balance-scale fa-2x me-3 text-primary"></i>
+                                            <div>
+                                                <strong>Evaluate</strong>
+                                                <p class="small mb-0 text-muted">Judge, critique, assess quality</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="custom-checkbox">
+                                    <input type="checkbox" class="btn-check" name="bloom_focus" id="create" value="Create">
+                                    <label class="btn btn-outline-dark w-100 p-3 text-start" for="create">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-plus-circle fa-2x me-3 text-dark"></i>
+                                            <div>
+                                                <strong>Create</strong>
+                                                <p class="small mb-0 text-muted">Design, generate, produce new ideas</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg btn-step px-5">
+                        <i class="fas fa-magic me-2"></i>Get AI Recommendation
+                        <div class="spinner-border spinner-border-sm d-none ms-2" id="submitSpinner"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="d-flex justify-content-between mt-4" id="navigation-buttons">
+                <button type="button" class="btn btn-outline-secondary btn-step" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+                    <i class="fas fa-chevron-left me-2"></i>Previous
+                </button>
+                <button type="button" class="btn btn-primary btn-step" id="nextBtn" onclick="changeStep(1)">
+                    Next<i class="fas fa-chevron-right ms-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.form-step').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Show current step
+    document.getElementById(`step${step}`).classList.add('active');
+    
+    // Update progress bar
+    const progress = (step / totalSteps) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+    
+    // Update step indicators
+    for (let i = 1; i <= totalSteps; i++) {
+        const indicator = document.getElementById(`step${i}-indicator`);
+        if (i < step) {
+            indicator.classList.remove('active', 'pending');
+            indicator.classList.add('completed');
+            indicator.innerHTML = '<i class="fas fa-check"></i>';
+        } else if (i === step) {
+            indicator.classList.remove('completed', 'pending');
+            indicator.classList.add('active');
+            indicator.innerHTML = i;
+        } else {
+            indicator.classList.remove('completed', 'active');
+            indicator.classList.add('pending');
+            indicator.innerHTML = i;
+        }
+    }
+    
+    // Update navigation buttons
+    document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'inline-block';
+    document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'inline-block';
+    document.getElementById('navigation-buttons').style.display = step === totalSteps ? 'none' : 'flex';
+}
+
+function changeStep(direction) {
+    if (direction === 1 && validateCurrentStep()) {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    } else if (direction === -1) {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    }
+}
+
+function validateCurrentStep() {
+    const currentStepElement = document.getElementById(`step${currentStep}`);
+    const requiredFields = currentStepElement.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (field.type === 'radio') {
+            const radioGroup = currentStepElement.querySelectorAll(`[name="${field.name}"]`);
+            const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+            if (!isChecked) {
+                isValid = false;
+                showValidationMessage(field.name, 'Please select an option');
+            }
+        } else if (field.type === 'select-one' && !field.value) {
+            isValid = false;
+            field.classList.add('is-invalid');
+            showValidationMessage(field.name, 'Please select an option');
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    return isValid;
+}
+
+function showValidationMessage(fieldName, message) {
+    // Remove existing validation messages
+    document.querySelectorAll('.validation-message').forEach(el => el.remove());
+    
+    // Find the field container
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    if (field) {
+        const container = field.closest('.mb-3') || field.closest('.mb-4');
+        if (container) {
+            const validationDiv = document.createElement('div');
+            validationDiv.className = 'validation-message text-danger small mt-1';
+            validationDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${message}`;
+            container.appendChild(validationDiv);
+        }
+    }
+}
+
+// Form submission
+document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const spinner = document.getElementById('submitSpinner');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    // Show loading overlay
+    document.getElementById('loading-overlay').classList.remove('d-none');
+    
+    // Submit form after a brief delay for UX
+    setTimeout(() => {
+        this.submit();
+    }, 1000);
+});
+
+// Add form field animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Add focus animations to form controls
+    document.querySelectorAll('.form-select, .form-control').forEach(field => {
+        field.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        field.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add click animations to radio and checkbox buttons
+    document.querySelectorAll('.btn-check').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                this.nextElementSibling.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.nextElementSibling.style.transform = 'scale(1)';
+                }, 100);
+            }
+        });
+    });
+});
+
+// Initialize first step
+showStep(1);
+</script>
+{% endblock %}
